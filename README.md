@@ -93,27 +93,36 @@ hl run claude_agent -i ETH-PERP --tick 15 --model claude-sonnet-4-20250514
 
 Each tick, Claude receives market data, position state, and risk context, then decides to `place_order` or `hold` using structured tool calls.
 
-## Use as a Claude Code Skill
-
-Copy the skill into your Claude Code skills directory:
+## Install as a Claude Code Skill
 
 ```bash
+# 1. Clone and install the CLI
+git clone https://github.com/Nunchi-trade/agent-cli.git ~/agent-cli
+cd ~/agent-cli && pip install -e .
+
+# 2. Install the skill
 mkdir -p ~/.claude/skills/yex-trader
-cp cli/skill.md ~/.claude/skills/yex-trader/SKILL.md
+cp ~/agent-cli/cli/skill.md ~/.claude/skills/yex-trader/SKILL.md
 ```
 
-Then in Claude Code, the agent can run trading commands directly.
+Claude Code will automatically discover it. Use `/yex-trader` or ask Claude to run trading strategies — it knows all the commands.
 
-## Use as an OpenClaw AgentSkill
+## Install as an OpenClaw Skill
 
-The OpenClaw skill config is at `cli/openclaw_skill.json`. Register it with your OpenClaw agent:
+```bash
+# 1. Clone and install the CLI
+git clone https://github.com/Nunchi-trade/agent-cli.git ~/agent-cli
+cd ~/agent-cli && pip install -e .
 
-```json
-{
-  "name": "yex-trader",
-  "actions": ["run_strategy", "check_status", "place_trade", "check_account", "list_strategies"]
-}
+# 2. Install the skill via ClawHub (if published)
+clawhub install nunchi-trade/yex-trader
+
+# Or manually copy the skill file
+mkdir -p ~/.openclaw/workspace/skills/yex-trader
+cp ~/agent-cli/cli/skill.md ~/.openclaw/workspace/skills/yex-trader/SKILL.md
 ```
+
+The skill uses the [Agent Skills](https://agentskills.io) open standard — the same `SKILL.md` format works for both Claude Code and OpenClaw.
 
 ## Configuration
 
