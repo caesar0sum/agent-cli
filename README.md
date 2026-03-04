@@ -19,12 +19,38 @@ hl setup check
 
 # Mock test (no connection needed)
 hl run avellaneda_mm --mock --max-ticks 10
+```
 
-# Live testnet
-hl run avellaneda_mm -i ETH-PERP --tick 10
+### YEX Testnet
 
-# Run the full WOLF autonomous strategy
-hl wolf run --mock --max-ticks 10
+```bash
+# 1. Claim testnet USDyP (required for YEX yield markets)
+curl --location 'https://api-temp.nunchi.trade/api/v1/yex/usdyp-claim' \
+  --header 'x-network: testnet' \
+  --header 'Content-Type: application/json' \
+  --data '{"userAddress":"<YOUR_WALLET_ADDRESS>"}'
+
+# 2. Approve builder fee (one-time)
+hl builder approve
+
+# 3. Trade on testnet
+hl run avellaneda_mm -i VXX-USDYP --tick 15       # YEX yield market
+hl run engine_mm -i ETH-PERP --tick 10             # Standard perp
+hl wolf run --max-ticks 10                          # WOLF multi-slot
+```
+
+### Mainnet
+
+```bash
+export HL_TESTNET=false
+
+# 1. Approve builder fee (one-time)
+hl builder approve --mainnet
+
+# 2. Trade on mainnet
+hl run engine_mm -i ETH-PERP --tick 10 --mainnet
+hl run avellaneda_mm -i BTC-PERP --tick 10 --mainnet
+hl wolf run --mainnet
 ```
 
 ## Architecture
@@ -411,16 +437,22 @@ hl house join simple_mm --url http://house:8080 --poll 5
 
 Collect revenue on every trade via Hyperliquid's native builder fee system. The fee is attached to each order as `BuilderInfo` — no extra gas, no contract calls, no custodial risk.
 
-```bash
-# Configure (env vars or YAML)
-export BUILDER_ADDRESS=0xYourAddress
-export BUILDER_FEE_TENTHS_BPS=10  # 10 = 1 bps = 0.01%
+**Default:** 10 bps (0.1%) to `0xF8C75F891cb011E2097308b856bEC74f5ea10F20`. Active on every order automatically.
 
-# Users must approve once
-hl builder approve
+```bash
+# Users must approve once per network
+hl builder approve             # testnet
+hl builder approve --mainnet   # mainnet
 
 # Check config
 hl builder status
+```
+
+To override the defaults, set env vars or use YAML config:
+
+```bash
+export BUILDER_ADDRESS=0xCustomAddress
+export BUILDER_FEE_TENTHS_BPS=50  # 50 = 5 bps = 0.05%
 ```
 
 Or in YAML config:
