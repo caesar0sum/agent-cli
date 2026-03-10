@@ -243,7 +243,10 @@ class HLProxy:
         from hyperliquid.utils import constants
 
         base_url = constants.TESTNET_API_URL if self.testnet else constants.MAINNET_API_URL
-        self._info = Info(base_url, skip_ws=True)
+        try:
+            self._info = Info(base_url, skip_ws=True)
+        except (IndexError, KeyError):
+            self._info = Info(base_url, skip_ws=True, meta_and_asset_ctxs=None)
 
         account = Account.from_key(self.private_key)
         self._address = account.address
